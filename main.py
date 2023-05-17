@@ -9,6 +9,9 @@ import plotly.express as px
 from sqlalchemy import create_engine
 import os
 
+
+os.mkdir(os.path.join(".","tempDir"))
+
 conn = st.experimental_connection("local_db", type="sql", url="sqlite:///")
 engine = create_engine(url="sqlite:///")
 
