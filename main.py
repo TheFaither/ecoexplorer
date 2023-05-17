@@ -47,14 +47,22 @@ dft2[["uploaddate", "collectiondate"]] = dft2[["uploaddate", "collectiondate"]].
 dfe = conn.query("select * from experiment")
 dff = [dfi, dfs, dft1, dft2, dfe]
 tabs = st.tabs(
-    ["Investigator", "Sample", "Silk Trait", "Individual Trait", "Experiment"]
+    ["Home","Investigator", "Sample", "Silk Trait", "Individual Trait", "Experiment"]
 )
 
 for dfnum, df in enumerate(dff):
-    with tabs[dfnum]:
+    with tabs[dfnum+1]:
         st.dataframe(df)
+with tabs[0]:
+    st.write(
+        "# Base Explorer\n" 
+        "by _Daniele Liprandi_\n"
+    )
+    st.write(
+        "Visit the Individual Trait tab to see some filter possibilities."
+    )
 
-with tabs[1]:
+with tabs[2]:
     # st.bar_chart(
     #    data=dfs, x="id", y="species", width=0, height=0, use_container_width=True
     # )
@@ -97,7 +105,7 @@ with tabs[1]:
     st.plotly_chart(figparenttree)
     st.divider()
 
-with tabs[2]:
+with tabs[3]:
     st.write("Diameters chart")
     # -------------------------------- line chart -------------------------------- #
     st.line_chart(
@@ -107,7 +115,7 @@ with tabs[2]:
     figtraithist = px.histogram(dft1, x="diameter")
     st.plotly_chart(figtraithist)
 
-with tabs[3]:
+with tabs[4]:
     st.write("Weight chart")
     # --------------------------------- histogram -------------------------------- #
     optiongroupby = st.selectbox(
