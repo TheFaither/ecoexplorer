@@ -77,7 +77,6 @@ with tabs[2]:
         dfs,
         path=[px.Constant("all"), "family", "genus", "species"],
     )
-    figcollectiontree.update_traces(root_color="lightgrey")
     figcollectiontree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
     figcollectiontree.update_traces(marker=dict(cornerradius=20))
     st.plotly_chart(figcollectiontree)
@@ -96,7 +95,6 @@ with tabs[2]:
         hover_data=["nomenclature", "sample_class"],
         labels=["id", "sample_class"],
     )
-    figparenttree.update_traces(root_color="lightgrey")
     figparenttree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
     figparenttree.update_traces(marker=dict(cornerradius=20))
     figparenttree.update_traces(
