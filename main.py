@@ -9,7 +9,7 @@ import plotly.express as px
 from sqlalchemy import create_engine
 import os
 
-full_path(os.path.join(".","tempDir"))
+full_path = os.path.join(".","tempDir")
 os.makedirs(full_path,exist_ok=True)
 
 conn = st.experimental_connection("local_db", type="sql", url="sqlite:///")
