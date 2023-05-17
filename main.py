@@ -105,9 +105,11 @@ with tabs[3]:
     optiongroupby = st.selectbox(
         "Group by", ["family", "genus", "species", "samples_id"], index=0
     )
+    optionsselect = st.multiselect(
+    'Filter',
+    dfs.nomenclature.unique(), dfs.nomenclature.unique())
 
-    st.write("You selected:", optiongroupby)
-    figtraithist = px.histogram(dft2, x="weight", nbins=20, color=optiongroupby)
+    figtraithist = px.histogram(dft2.query('nomenclature in @optionsselect'), x="weight", nbins=20, color=optiongroupby)
     st.plotly_chart(figtraithist)
 # st.experimental_data_editor(
 #     dfs,
