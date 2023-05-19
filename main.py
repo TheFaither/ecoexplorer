@@ -135,7 +135,7 @@ with tabs[3]:
         dft1.query("nomenclature in @optionsselectd").query("uploaddate > @startdated"),
         x="diameter",
         nbins=20,
-        color=optiongroupby,
+        color=optiongroupbyd,
     )
     st.plotly_chart(figtraithistd)
 
