@@ -61,7 +61,10 @@ tabs = st.tabs(
 
 for dfnum, df in enumerate(dff):
     with tabs[dfnum+1]:
-        st.dataframe(df)
+        try:
+            st.dataframe(df)
+        except Exception as e:
+            pass
 with tabs[0]:
     st.write(
         "# Base Explorer\n" 
