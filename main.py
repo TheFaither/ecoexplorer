@@ -37,39 +37,38 @@ if datafile is not None:
 
 dfi = conn.query("select * from investigator")
 dfs = conn.query("select * from sample")
-dft1 = conn.query("select * from silktrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id")
+dft1 = conn.query(
+    "select * from silktrait NATURAL JOIN trait INNER JOIN sample ON trait.samples_id = sample.id"
+)
 dft2 = conn.query(
     "select * from individualtrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id"
 )
 try:
-    dft1[["uploaddate", "collectiondate"]] = dft1[["uploaddate", "collectiondate"]].apply(
-        pd.to_datetime
-    )
+    dft1[["uploaddate", "collectiondate"]] = dft1[
+        ["uploaddate", "collectiondate"]
+    ].apply(pd.to_datetime)
 except Exception as e:
     pass
 try:
-    dft2[["uploaddate", "collectiondate"]] = dft2[["uploaddate", "collectiondate"]].apply(
-        pd.to_datetime
-    )
+    dft2[["uploaddate", "collectiondate"]] = dft2[
+        ["uploaddate", "collectiondate"]
+    ].apply(pd.to_datetime)
 except Exception as e:
     pass
 dfe = conn.query("select * from experiment")
 dff = [dfi, dfs, dft1, dft2, dfe]
 tabs = st.tabs(
-    ["Home","Investigator", "Sample", "Silk Trait", "Individual Trait", "Experiment"]
+    ["Home", "Investigator", "Sample", "Silk Trait", "Individual Trait", "Experiment"]
 )
 
 for dfnum, df in enumerate(dff):
-    with tabs[dfnum+1]:
+    with tabs[dfnum + 1]:
         try:
             st.dataframe(df)
         except Exception as e:
             pass
 with tabs[0]:
-    st.write(
-        "# Base Explorer\n" 
-        "by _Daniele Liprandi_\n"
-    )
+    st.write("# Base Explorer\n" "by _Daniele Liprandi_\n")
     st.write(
         "Visit the Silk Trait tab or Individual Trait tab to see some filter possibilities."
     )
@@ -97,6 +96,7 @@ with tabs[2]:
     optiongroupby = st.selectbox(
         "Color by",
         ["family", "genus", "species", "sample_class", "responsible_id"],
+        key="optiongroupby_parent",
         index=3,
     )
     figparenttree = px.treemap(
@@ -119,13 +119,16 @@ with tabs[3]:
     st.write("Diameters chart")
     # -------------------------------- line chart -------------------------------- #
     optiongroupbyd = st.selectbox(
-        "Color by", ["family", "genus", "species", "samples_id"], index=0
+        "Color by",
+        ["family", "genus", "species", "samples_id", "parent_id"],
+        key="optiongroupby_diameter",
+        index=0,
     )
     optionsselectd = st.multiselect(
-        "Filter", dfs.nomenclature.unique(), dfs.nomenclature.unique()
+        "Filter diameter", dfs.nomenclature.unique(), dfs.nomenclature.unique()
     )
     startdated = st.slider(
-        "Show only data uploaded after this date",
+        "Show only diameter rdata uploaded after this date",
         min_value=datetime.datetime.fromisocalendar(2020, 1, 1),
         max_value=datetime.datetime.fromisocalendar(2024, 1, 1),
         value=datetime.datetime.fromisocalendar(2022, 1, 1),
@@ -143,13 +146,16 @@ with tabs[4]:
     st.write("Weight chart")
     # --------------------------------- histogram -------------------------------- #
     optiongroupby = st.selectbox(
-        "Color by", ["family", "genus", "species", "samples_id"], index=0
+        "Color by",
+        ["family", "genus", "species", "samples_id"],
+        key="optiongroupby_mass",
+        index=0,
     )
     optionsselect = st.multiselect(
         "Filter", dfs.nomenclature.unique(), dfs.nomenclature.unique()
     )
     startdate = st.slider(
-        "Show only data uploaded after this date",
+        "Show only weight data uploaded after this date",
         min_value=datetime.datetime.fromisocalendar(2020, 1, 1),
         max_value=datetime.datetime.fromisocalendar(2024, 1, 1),
         value=datetime.datetime.fromisocalendar(2022, 1, 1),
@@ -162,11 +168,12 @@ with tabs[4]:
         color=optiongroupby,
     )
     st.plotly_chart(figtraithist)
-# st.experimental_data_editor(
-#     dfs,
-#     width=None,
-#     height=None,
-#     use_container_width=False,
-#     num_rows="dynamic",
-#     on_change=dfs.to_sql("sample", engine, if_exists='replace'),
-# )
+# with tabs[0]:
+#     st.experimental_data_editor(
+#         dft1,
+#         width=None,
+#         height=None,
+#         use_container_width=False,
+#         num_rows="dynamic",
+#         on_change=dfs.to_sql("sample", engine, if_exists='replace'),
+#     )
