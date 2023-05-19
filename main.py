@@ -6,7 +6,7 @@ A visualizer for SuPerBase _by Daniele Liprandi_
 
 import streamlit as st
 import plotly.express as px
-from sqlalchemy import create_engine
+# from sqlalchemy import create_engine
 import os
 import datetime
 import pandas as pd
@@ -15,8 +15,9 @@ import numpy as np
 full_path = os.path.join(".", "tempDir")
 os.makedirs(full_path, exist_ok=True)
 
-conn = st.experimental_connection("local_db", type="sql", url="sqlite:///")
-engine = create_engine(url="sqlite:///")
+
+conn = st.experimental_connection("local_db", type="sql", url="sqlite:///demoframe.sql")
+# engine = create_engine(url="sqlite:///demoDir/superframe.sql")
 
 
 def save_uploaded_file(uploadedfile):
