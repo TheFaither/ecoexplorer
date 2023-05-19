@@ -10,6 +10,7 @@ from sqlalchemy import create_engine
 import os
 import datetime
 import pandas as pd
+import numpy as np
 
 full_path = os.path.join(".", "tempDir")
 os.makedirs(full_path, exist_ok=True)
@@ -73,6 +74,9 @@ with tabs[0]:
         "Visit the Silk Trait tab or Individual Trait tab to see some filter possibilities."
     )
 
+# ---------------------------------------------------------------------------- #
+#                                  sample page                                 #
+# ---------------------------------------------------------------------------- #
 with tabs[2]:
     # st.bar_chart(
     #    data=dfs, x="id", y="species", width=0, height=0, use_container_width=True
@@ -115,18 +119,31 @@ with tabs[2]:
     st.plotly_chart(figparenttree)
     st.divider()
 
+# ---------------------------------------------------------------------------- #
+#                                  silk traits                                 #
+# ---------------------------------------------------------------------------- #
 with tabs[3]:
     st.write("Diameters chart")
     # -------------------------------- line chart -------------------------------- #
     optiongroupbyd = st.selectbox(
         "Color by",
-        ["family", "genus", "species", "samples_id", "parent_id"],
+        ["family", "genus", "species", "samples_id", "parent_id", "sample_class"],
         key="optiongroupby_diameter",
         index=0,
     )
-    optionsselectd = st.multiselect(
-        "Filter diameter", dfs.nomenclature.unique(), dfs.nomenclature.unique()
-    )
+    with st.expander("Filters", expanded=False):
+        diameterfilterfamily = st.multiselect(
+            "Family", dfs.family.unique(), dfs.family.unique(), key="diamfilter1"
+        )
+        diameterfilterspecies = st.multiselect(
+            "Species",
+            dfs.nomenclature.unique(),
+            dfs.nomenclature.unique(),
+            key="diamfilter2",
+        )
+        diameterfiltersample = st.multiselect(
+            "Sample", dfs.id.unique(), dfs.id.unique(), key="diamfilter3"
+        )
     startdated = st.slider(
         "Show only diameter rdata uploaded after this date",
         min_value=datetime.datetime.fromisocalendar(2020, 1, 1),
@@ -135,13 +152,22 @@ with tabs[3]:
     )
 
     figtraithistd = px.histogram(
-        dft1.query("nomenclature in @optionsselectd").query("uploaddate > @startdated"),
+        dft1.query("family in @diameterfilterfamily")
+        .query("nomenclature in @diameterfilterspecies")
+        .query("id in @diameterfiltersample")
+        .query("uploaddate > @startdated"),
         x="diameter",
         nbins=20,
         color=optiongroupbyd,
     )
     st.plotly_chart(figtraithistd)
-
+    try:
+            st.dataframe(dft1.groupby(optiongroupbyd).describe(include=[np.number]).transpose())
+    except Exception as e:
+        pass
+# ---------------------------------------------------------------------------- #
+#                               individual trait                               #
+# ---------------------------------------------------------------------------- #
 with tabs[4]:
     st.write("Weight chart")
     # --------------------------------- histogram -------------------------------- #
@@ -151,9 +177,19 @@ with tabs[4]:
         key="optiongroupby_mass",
         index=0,
     )
-    optionsselect = st.multiselect(
-        "Filter", dfs.nomenclature.unique(), dfs.nomenclature.unique()
-    )
+    with st.expander("Filters", expanded=False):
+        weightfilterfamily = st.multiselect(
+            "Family", dfs.family.unique(), dfs.family.unique(), key="weifilter1"
+        )
+        weightfilterspecies = st.multiselect(
+            "Species",
+            dfs.nomenclature.unique(),
+            dfs.nomenclature.unique(),
+            key="weifilter2",
+        )
+        weightfiltersample = st.multiselect(
+            "Sample", dfs.id.unique(), dfs.id.unique(), key="weifilter3"
+        )
     startdate = st.slider(
         "Show only weight data uploaded after this date",
         min_value=datetime.datetime.fromisocalendar(2020, 1, 1),
@@ -162,12 +198,20 @@ with tabs[4]:
     )
 
     figtraithist = px.histogram(
-        dft2.query("nomenclature in @optionsselect").query("uploaddate > @startdate"),
+        dft2.query("family in @weightfilterfamily")
+        .query("nomenclature in @weightfilterspecies")
+        .query("id in @weightfiltersample")
+        .query("uploaddate > @startdate"),
         x="weight",
         nbins=20,
         color=optiongroupby,
     )
     st.plotly_chart(figtraithist)
+
+    try:
+        st.dataframe(dft2.groupby(optiongroupby).describe(include=[np.number]).transpose())
+    except Exception as e:
+        pass
 # with tabs[0]:
 #     st.experimental_data_editor(
 #         dft1,
