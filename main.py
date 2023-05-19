@@ -68,7 +68,7 @@ with tabs[0]:
         "by _Daniele Liprandi_\n"
     )
     st.write(
-        "Visit the Individual Trait tab to see some filter possibilities."
+        "Visit the Silk Trait tab or Individual Trait tab to see some filter possibilities."
     )
 
 with tabs[2]:
