@@ -123,7 +123,7 @@ with tabs[2]:
 #                                  silk traits                                 #
 # ---------------------------------------------------------------------------- #
 with tabs[3]:
-    st.write("Diameters chart")
+    st.write("## Diameters Analysis")
     # -------------------------------- line chart -------------------------------- #
     optiongroupbyd = st.selectbox(
         "Color by",
@@ -170,7 +170,7 @@ with tabs[3]:
 #                               individual trait                               #
 # ---------------------------------------------------------------------------- #
 with tabs[4]:
-    st.write("Weight chart")
+    st.write("## Weight Analysis")
     # --------------------------------- histogram -------------------------------- #
     optiongroupby = st.selectbox(
         "Color by",
