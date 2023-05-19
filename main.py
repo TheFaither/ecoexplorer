@@ -132,7 +132,7 @@ with tabs[3]:
     )
 
     figtraithistd = px.histogram(
-        dft1.query("nomenclature in @optionsselect").query("uploaddate > @startdate"),
+        dft1.query("nomenclature in @optionsselectd").query("uploaddate > @startdate"),
         x="weight",
         nbins=20,
         color=optiongroupby,
