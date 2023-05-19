@@ -118,26 +118,26 @@ with tabs[2]:
 with tabs[3]:
     st.write("Diameters chart")
     # -------------------------------- line chart -------------------------------- #
-    optiongroupby = st.selectbox(
+    optiongroupbyd = st.selectbox(
         "Color by", ["family", "genus", "species", "samples_id"], index=0
     )
-    optionsselect = st.multiselect(
+    optionsselectd = st.multiselect(
         "Filter", dfs.nomenclature.unique(), dfs.nomenclature.unique()
     )
-    startdate = st.slider(
+    startdated = st.slider(
         "Show only data uploaded after this date",
         min_value=datetime.datetime.fromisocalendar(2020, 1, 1),
         max_value=datetime.datetime.fromisocalendar(2024, 1, 1),
         value=datetime.datetime.fromisocalendar(2022, 1, 1),
     )
 
-    figtraithist = px.histogram(
-        dft2.query("nomenclature in @optionsselect").query("uploaddate > @startdate"),
+    figtraithistd = px.histogram(
+        dft1.query("nomenclature in @optionsselect").query("uploaddate > @startdate"),
         x="weight",
         nbins=20,
         color=optiongroupby,
     )
-    st.plotly_chart(figtraithist)
+    st.plotly_chart(figtraithistd)
 
 with tabs[4]:
     st.write("Weight chart")
