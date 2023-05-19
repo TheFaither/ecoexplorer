@@ -162,9 +162,10 @@ with tabs[3]:
     )
     st.plotly_chart(figtraithistd)
     try:
-            st.dataframe(dft1.groupby(optiongroupbyd).describe(include=[np.number]).transpose())
+        st.write(f"Diameter statistics grouped by {optiongroupbyd}")    
+        st.dataframe(dft1.groupby(optiongroupbyd)["diameter"].describe(include=[np.number]).transpose())
     except Exception as e:
-        pass
+        st.write(e)
 # ---------------------------------------------------------------------------- #
 #                               individual trait                               #
 # ---------------------------------------------------------------------------- #
@@ -209,9 +210,10 @@ with tabs[4]:
     st.plotly_chart(figtraithist)
 
     try:
-        st.dataframe(dft2.groupby(optiongroupby).describe(include=[np.number]).transpose())
+        st.write(f"Weight statistics grouped by {optiongroupbyd}")    
+        st.dataframe(dft2.groupby(optiongroupbyd)["weight"].describe(include=[np.number]).transpose())
     except Exception as e:
-        pass
+        st.write(e)
 # with tabs[0]:
 #     st.experimental_data_editor(
 #         dft1,
