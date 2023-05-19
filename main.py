@@ -41,9 +41,18 @@ dft1 = conn.query("select * from silktrait NATURAL JOIN trait")
 dft2 = conn.query(
     "select * from individualtrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id"
 )
-dft2[["uploaddate", "collectiondate"]] = dft2[["uploaddate", "collectiondate"]].apply(
-    pd.to_datetime
-)
+try:
+    dft1[["uploaddate", "collectiondate"]] = dft1[["uploaddate", "collectiondate"]].apply(
+        pd.to_datetime
+    )
+except Exception as e:
+    pass
+try:
+    dft2[["uploaddate", "collectiondate"]] = dft2[["uploaddate", "collectiondate"]].apply(
+        pd.to_datetime
+    )
+except Exception as e:
+    pass
 dfe = conn.query("select * from experiment")
 dff = [dfi, dfs, dft1, dft2, dfe]
 tabs = st.tabs(
@@ -59,7 +68,7 @@ with tabs[0]:
         "by _Daniele Liprandi_\n"
     )
     st.write(
-        "Visit the Individual Trait tab to see some filter possibilities."
+        "Visit the Silk Trait tab or Individual Trait tab to see some filter possibilities."
     )
 
 with tabs[2]:
@@ -77,7 +86,6 @@ with tabs[2]:
         dfs,
         path=[px.Constant("all"), "family", "genus", "species"],
     )
-    figcollectiontree.update_traces(root_color="lightgrey")
     figcollectiontree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
     figcollectiontree.update_traces(marker=dict(cornerradius=20))
     st.plotly_chart(figcollectiontree)
@@ -96,7 +104,6 @@ with tabs[2]:
         hover_data=["nomenclature", "sample_class"],
         labels=["id", "sample_class"],
     )
-    figparenttree.update_traces(root_color="lightgrey")
     figparenttree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
     figparenttree.update_traces(marker=dict(cornerradius=20))
     figparenttree.update_traces(
@@ -108,11 +115,25 @@ with tabs[2]:
 with tabs[3]:
     st.write("Diameters chart")
     # -------------------------------- line chart -------------------------------- #
-    st.line_chart(
-        data=dft1, x="id", y="diameter", width=0, height=0, use_container_width=True
+    optiongroupby = st.selectbox(
+        "Color by", ["family", "genus", "species", "samples_id"], index=0
     )
-    # --------------------------------- histogram -------------------------------- #
-    figtraithist = px.histogram(dft1, x="diameter")
+    optionsselect = st.multiselect(
+        "Filter", dfs.nomenclature.unique(), dfs.nomenclature.unique()
+    )
+    startdate = st.slider(
+        "Show only data uploaded after this date",
+        min_value=datetime.datetime.fromisocalendar(2020, 1, 1),
+        max_value=datetime.datetime.fromisocalendar(2024, 1, 1),
+        value=datetime.datetime.fromisocalendar(2022, 1, 1),
+    )
+
+    figtraithist = px.histogram(
+        dft2.query("nomenclature in @optionsselect").query("uploaddate > @startdate"),
+        x="weight",
+        nbins=20,
+        color=optiongroupby,
+    )
     st.plotly_chart(figtraithist)
 
 with tabs[4]:
