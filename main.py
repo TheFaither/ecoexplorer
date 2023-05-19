@@ -41,9 +41,12 @@ dft1 = conn.query("select * from silktrait NATURAL JOIN trait")
 dft2 = conn.query(
     "select * from individualtrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id"
 )
-dft2[["uploaddate", "collectiondate"]] = dft2[["uploaddate", "collectiondate"]].apply(
-    pd.to_datetime
-)
+try:
+    dft2[["uploaddate", "collectiondate"]] = dft2[["uploaddate", "collectiondate"]].apply(
+        pd.to_datetime
+    )
+except Exception as e:
+    pass
 dfe = conn.query("select * from experiment")
 dff = [dfi, dfs, dft1, dft2, dfe]
 tabs = st.tabs(
