@@ -37,7 +37,7 @@ if datafile is not None:
 
 dfi = conn.query("select * from investigator")
 dfs = conn.query("select * from sample")
-dft1 = conn.query("select * from silktrait NATURAL JOIN trait")
+dft1 = conn.query("select * from silktrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id")
 dft2 = conn.query(
     "select * from individualtrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id"
 )
