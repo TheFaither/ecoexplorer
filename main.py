@@ -152,14 +152,15 @@ with tabs[3]:
         max_value=datetime.datetime.fromisocalendar(2024, 1, 1),
         value=datetime.datetime.fromisocalendar(2022, 1, 1),
     )
-
+    nbinslider = st.slider('Number of histogram bins', min_value=1, max_value=100, value=20)
+    
     figtraithistd = px.histogram(
         dft1.query("family in @diameterfilterfamily")
         .query("nomenclature in @diameterfilterspecies")
         .query("id in @diameterfiltersample")
         .query("uploaddate > @startdated"),
         x="diameter",
-        nbins=20,
+        nbins=nbinslider,
         color=optiongroupbyd,
     )
     st.plotly_chart(figtraithistd)
