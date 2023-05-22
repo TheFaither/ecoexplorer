@@ -73,7 +73,7 @@ with tabs[0]:
     st.write("# Base Explorer\n" "by _Daniele Liprandi_\n")
     st.write("A demo database is initially displayed. Please upload a database using the left sidebar")
     st.write(
-        "Visit the Silk Trait tab or Individual Trait tab to see some filter possibilities."
+        "Visit the Silk Trait tab to see an analysis demonstration."
     )
 
 # ---------------------------------------------------------------------------- #
