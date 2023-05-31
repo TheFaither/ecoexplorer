@@ -88,18 +88,18 @@ with tabs[2]:
     # dfsmap = dfs.dropna(subset="latitude")
     # st.map(data=dfsmap)
     # st.divider()
-    # # fighist = px.histogram(dfs, x="species", histfunc="count")
-    # # st.plotly_chart(fighist)
-    # # st.divider()
-    # # ------------------------------ collection tree ----------------------------- #
-    # figcollectiontree = px.treemap(
-    #     dfs,
-    #     path=[px.Constant("all"), "family", "genus", "species"],
-    # )
-    # figcollectiontree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
-    # figcollectiontree.update_traces(marker=dict(cornerradius=20))
-    # st.plotly_chart(figcollectiontree)
+    # fighist = px.histogram(dfs, x="species", histfunc="count")
+    # st.plotly_chart(fighist)
     # st.divider()
+    # ------------------------------ collection tree ----------------------------- #
+    figcollectiontree = px.treemap(
+        dfs,
+        path=[px.Constant("all"), "family", "genus", "species"],
+    )
+    figcollectiontree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
+    figcollectiontree.update_traces(marker=dict(cornerradius=20))
+    st.plotly_chart(figcollectiontree)
+    st.divider()
     # # ------------------------------ Parent tree ----------------------------- #
     # optiongroupby = st.selectbox(
     #     "Color by",
@@ -208,6 +208,9 @@ with tabs[4]:
         max_value=datetime.datetime.fromisocalendar(2024, 1, 1),
         value=datetime.datetime.fromisocalendar(2022, 1, 1),
     )
+    nbinslider = st.slider('Number of histogram bins', min_value=1, max_value=1000, value=20, key="individualbinsslider")
+    #minmaxdf = dft2.agg([min, max])
+    #mintraitval, maxtraitval = st.slider("Select range", value=[minmaxdf.loc["min",optionindivtrait],minmaxdf.loc["max",optionindivtrait]])
 
     figtraithist = px.histogram(
         dft2.query("family in @weightfilterfamily")
@@ -215,7 +218,7 @@ with tabs[4]:
         .query("id in @weightfiltersample")
         .query("uploaddate > @startdate"),
         x=optionindivtrait,
-        nbins=20,
+        nbins=nbinslider,
         color=optiongroupby,
     )
     st.plotly_chart(figtraithist)
