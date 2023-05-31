@@ -19,7 +19,7 @@ os.makedirs(full_path, exist_ok=True)
 conn = st.experimental_connection("local_db", type="sql", url="sqlite:///demoframe.sql")
 # engine = create_engine(url="sqlite:///demoDir/evonest.sql")
 
-
+st.cache_resource
 def save_uploaded_file(uploadedfile):
     with open(os.path.join("tempDir", uploadedfile.name), "wb") as f:
         f.write(uploadedfile.getbuffer())
@@ -80,46 +80,48 @@ with tabs[0]:
 #                                  sample page                                 #
 # ---------------------------------------------------------------------------- #
 with tabs[2]:
+    pass
     # st.bar_chart(
     #    data=dfs, x="id", y="species", width=0, height=0, use_container_width=True
     # )
     # st.divider()
-    st.map(data=dfs)
-    st.divider()
-    # fighist = px.histogram(dfs, x="species", histfunc="count")
-    # st.plotly_chart(fighist)
+    # dfsmap = dfs.dropna(subset="latitude")
+    # st.map(data=dfsmap)
     # st.divider()
-    # ------------------------------ collection tree ----------------------------- #
-    figcollectiontree = px.treemap(
-        dfs,
-        path=[px.Constant("all"), "family", "genus", "species"],
-    )
-    figcollectiontree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
-    figcollectiontree.update_traces(marker=dict(cornerradius=20))
-    st.plotly_chart(figcollectiontree)
-    st.divider()
-    # ------------------------------ Parent tree ----------------------------- #
-    optiongroupby = st.selectbox(
-        "Color by",
-        ["family", "genus", "species", "sample_class", "responsible_id"],
-        key="optiongroupby_parent",
-        index=3,
-    )
-    figparenttree = px.treemap(
-        dfs,
-        names="id",
-        parents="parent_id",
-        color=optiongroupby,
-        hover_data=["nomenclature", "sample_class"],
-        labels=["id", "sample_class"],
-    )
-    figparenttree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
-    figparenttree.update_traces(marker=dict(cornerradius=20))
-    figparenttree.update_traces(
-        textinfo="label+value+percent parent+percent entry+percent root"
-    )
-    st.plotly_chart(figparenttree)
-    st.divider()
+    # # fighist = px.histogram(dfs, x="species", histfunc="count")
+    # # st.plotly_chart(fighist)
+    # # st.divider()
+    # # ------------------------------ collection tree ----------------------------- #
+    # figcollectiontree = px.treemap(
+    #     dfs,
+    #     path=[px.Constant("all"), "family", "genus", "species"],
+    # )
+    # figcollectiontree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
+    # figcollectiontree.update_traces(marker=dict(cornerradius=20))
+    # st.plotly_chart(figcollectiontree)
+    # st.divider()
+    # # ------------------------------ Parent tree ----------------------------- #
+    # optiongroupby = st.selectbox(
+    #     "Color by",
+    #     ["family", "genus", "species", "sample_class", "responsible_id"],
+    #     key="optiongroupby_parent",
+    #     index=3,
+    # )
+    # figparenttree = px.treemap(
+    #     dfs,
+    #     names="id",
+    #     parents="parent_id",
+    #     color=optiongroupby,
+    #     hover_data=["nomenclature", "sample_class"],
+    #     labels=["id", "sample_class"],
+    # )
+    # figparenttree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
+    # figparenttree.update_traces(marker=dict(cornerradius=20))
+    # figparenttree.update_traces(
+    #     textinfo="label+value+percent parent+percent entry+percent root"
+    # )
+    # st.plotly_chart(figparenttree)
+    # st.divider()
 
 # ---------------------------------------------------------------------------- #
 #                                  silk traits                                 #
@@ -127,7 +129,7 @@ with tabs[2]:
 with tabs[3]:
     st.write("## Diameters Analysis")
     # -------------------------------- line chart -------------------------------- #
-    optiongroupbyd = st.selectbox(
+    optionindivtrait = st.selectbox(
         "Color by",
         ["family", "genus", "species", "samples_id", "parent_id", "sample_class"],
         key="optiongroupby_diameter",
@@ -161,19 +163,25 @@ with tabs[3]:
         .query("uploaddate > @startdated"),
         x="diameter",
         nbins=nbinslider,
-        color=optiongroupbyd,
+        color=optionindivtrait,
     )
     st.plotly_chart(figtraithistd)
     try:
-        st.write(f"Diameter statistics grouped by {optiongroupbyd}")    
-        st.dataframe(dft1.groupby(optiongroupbyd)["diameter"].describe(include=[np.number]).transpose())
+        st.write(f"Diameter statistics grouped by {optionindivtrait}")    
+        st.dataframe(dft1.groupby(optionindivtrait)["diameter"].describe(include=[np.number]).transpose())
     except Exception as e:
         st.write(e)
 # ---------------------------------------------------------------------------- #
 #                               individual trait                               #
 # ---------------------------------------------------------------------------- #
 with tabs[4]:
-    st.write("## Weight Analysis")
+    optionindivtrait = st.selectbox(
+        "Select a trait",
+        ["weight", "body_length"],
+        key="optionindivtrait",
+        index=0,
+    )
+    st.write(f"## {optionindivtrait} analysis")
     # --------------------------------- histogram -------------------------------- #
     optiongroupby = st.selectbox(
         "Color by",
@@ -206,15 +214,15 @@ with tabs[4]:
         .query("nomenclature in @weightfilterspecies")
         .query("id in @weightfiltersample")
         .query("uploaddate > @startdate"),
-        x="weight",
+        x=optionindivtrait,
         nbins=20,
         color=optiongroupby,
     )
     st.plotly_chart(figtraithist)
 
     try:
-        st.write(f"Weight statistics grouped by {optiongroupbyd}")    
-        st.dataframe(dft2.groupby(optiongroupbyd)["weight"].describe(include=[np.number]).transpose())
+        st.write(f"{optionindivtrait} statistics grouped by {optiongroupby}")    
+        st.dataframe(dft2.groupby(optiongroupby)[optionindivtrait].describe(include=[np.number]).transpose())
     except Exception as e:
         st.write(e)
 # with tabs[0]:
