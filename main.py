@@ -80,9 +80,11 @@ with tabs[0]:
 #                                  sample page                                 #
 # ---------------------------------------------------------------------------- #
 with tabs[2]:
+    # ------------------------------------ map ----------------------------------- #
     dfsmap = dfs.dropna(subset="latitude")
     st.map(data=dfsmap)
     st.divider()
+    # --------------------------------- Histogram -------------------------------- #
     fighist = px.histogram(dfs, x="species", histfunc="count")
     st.plotly_chart(fighist)
     st.divider()
