@@ -220,6 +220,7 @@ with tabs[4]:
         x=optionindivtrait,
         nbins=nbinslider,
         color=optiongroupby,
+        log_x=True,
     )
     st.plotly_chart(figtraithist)
 
