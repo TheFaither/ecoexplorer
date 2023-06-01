@@ -80,17 +80,12 @@ with tabs[0]:
 #                                  sample page                                 #
 # ---------------------------------------------------------------------------- #
 with tabs[2]:
-    pass
-    # st.bar_chart(
-    #    data=dfs, x="id", y="species", width=0, height=0, use_container_width=True
-    # )
-    # st.divider()
-    # dfsmap = dfs.dropna(subset="latitude")
-    # st.map(data=dfsmap)
-    # st.divider()
-    # fighist = px.histogram(dfs, x="species", histfunc="count")
-    # st.plotly_chart(fighist)
-    # st.divider()
+    dfsmap = dfs.dropna(subset="latitude")
+    st.map(data=dfsmap)
+    st.divider()
+    fighist = px.histogram(dfs, x="species", histfunc="count")
+    st.plotly_chart(fighist)
+    st.divider()
     # ------------------------------ collection tree ----------------------------- #
     figcollectiontree = px.treemap(
         dfs,
