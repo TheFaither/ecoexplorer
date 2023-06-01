@@ -221,7 +221,8 @@ with tabs[4]:
         nbins=nbinslider,
         color=optiongroupby,
         log_x=True,
-        labels=["body length (mm)","count"]
+    ).update_layout(
+        xaxis_title="Body length (mm)"
     )
     st.plotly_chart(figtraithist)
 
