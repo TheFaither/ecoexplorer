@@ -19,7 +19,6 @@ os.makedirs(full_path, exist_ok=True)
 conn = st.experimental_connection("local_db", type="sql", url="sqlite:///demoframe.sql")
 # engine = create_engine(url="sqlite:///demoDir/evonest.sql")
 
-st.cache_resource
 def save_uploaded_file(uploadedfile):
     with open(os.path.join("tempDir", uploadedfile.name), "wb") as f:
         f.write(uploadedfile.getbuffer())
@@ -38,7 +37,8 @@ if datafile is not None:
 
 
 dfi = conn.query("select * from investigator")
-dfs = conn.query("select * from sample")
+dfs = conn.query("select * from sample") 
+dfsindividuals = conn.query("select * from sample NATURAL JOIN individualsample")
 dft1 = conn.query(
     "select * from silktrait NATURAL JOIN trait INNER JOIN sample ON trait.samples_id = sample.id"
 )
@@ -80,6 +80,8 @@ with tabs[0]:
 #                                  sample page                                 #
 # ---------------------------------------------------------------------------- #
 with tabs[2]:
+    with st.expander("Individuals", expanded=False):
+        st.write(dfsindividuals)
     # ------------------------------------ map ----------------------------------- #
     dfsmap = dfs.dropna(subset="latitude")
     st.map(data=dfsmap)
