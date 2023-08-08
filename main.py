@@ -46,7 +46,7 @@ dft1 = conn.query(
 )
 dft2 = conn.query(
     "select * from individualtrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id"
-)
+) 
 try:
     dft1[["uploaddate", "collectiondate"]] = dft1[
         ["uploaddate", "collectiondate"]
@@ -62,7 +62,7 @@ except Exception as e:
 dfe = conn.query("select * from experiment")
 dff = [dfi, dfs, dft1, dft2, dfe]
 tabs = st.tabs(
-    ["Home", "Investigator", "Sample", "Silk Trait", "Individual Trait", "Experiment", "ExplorerTest"]
+    ["Home", "Investigator", "Sample", "Silk Trait", "Individual Trait", "Experiment", "Chart Generator"]
 )
 
 for dfnum, df in enumerate(dff):
@@ -109,7 +109,9 @@ with tabs[2]:
         )
     # FIXME Tag None is considered, but it shouldn't. The best thing would be to clean all the nones in explorer
     figcollectiontreetag = px.treemap(
-        dfs.query("tags in @speciestagfilter"),
+        dfs
+        .query("tags in @speciestagfilter")
+        .query("tags.notnull()" ),
         path=[px.Constant("all"), "family", "genus", "species", "tags"],
     )
     figcollectiontreetag.update_layout(margin=dict(t=50, l=25, r=25, b=25))
@@ -193,7 +195,8 @@ with tabs[3]:
     )
 
     figtraithistd = px.histogram(
-        dft1.query("family in @diameterfilterfamily")
+        dft1
+        .query("family in @diameterfilterfamily")
         .query("nomenclature in @diameterfilterspecies")
         .query("id in @diameterfiltersample")
         .query("tags in @diameterfiltertag")
@@ -207,7 +210,14 @@ with tabs[3]:
     try:
         st.write(f"Diameter statistics grouped by {optionindivtrait}")
         st.dataframe(
-            dft1.groupby(optionindivtrait)["diameter"]
+            dft1
+            .query("family in @diameterfilterfamily")
+            .query("nomenclature in @diameterfilterspecies")
+            .query("id in @diameterfiltersample")
+            .query("tags in @diameterfiltertag")
+            .query("silk_type in @diameterfiltersilktype")
+            .query("uploaddate > @startdated")
+            .groupby(optionindivtrait)["diameter"]
             .describe(include=[np.number])
             .transpose()
         )
