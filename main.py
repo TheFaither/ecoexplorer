@@ -62,7 +62,7 @@ except Exception as e:
 dfe = conn.query("select * from experiment")
 dff = [dfi, dfs, dft1, dft2, dfe]
 tabs = st.tabs(
-    ["Home", "Investigator", "Sample", "Silk Trait", "Individual Trait", "Experiment"]
+    ["Home", "Investigator", "Sample", "Silk Trait", "Individual Trait", "Experiment", "ExplorerTest"]
 )
 
 for dfnum, df in enumerate(dff):
@@ -107,14 +107,14 @@ with tabs[2]:
         speciestagfilter = st.multiselect(
             "Tags", dfs.tags.unique(), dfs.tags.unique(), key="tagfilter1"
         )
-    #FIXME None is considered, but it shouldn't
-    figcollectiontree = px.treemap(
+    # FIXME Tag None is considered, but it shouldn't. The best thing would be to clean all the nones in explorer
+    figcollectiontreetag = px.treemap(
         dfs.query("tags in @speciestagfilter"),
         path=[px.Constant("all"), "family", "genus", "species", "tags"],
     )
-    figcollectiontree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
-    figcollectiontree.update_traces(marker=dict(cornerradius=20))
-    st.plotly_chart(figcollectiontree)
+    figcollectiontreetag.update_layout(margin=dict(t=50, l=25, r=25, b=25))
+    figcollectiontreetag.update_traces(marker=dict(cornerradius=20))
+    st.plotly_chart(figcollectiontreetag)
     st.divider()
     # # ------------------------------ Parent tree ----------------------------- #
     # optiongroupby = st.selectbox(
@@ -174,7 +174,10 @@ with tabs[3]:
             "Tag", dfs.tags.unique(), dfs.tags.unique(), key="diamfilter4"
         )
         diameterfiltersilktype = st.multiselect(
-            "Silk type", dft1.silk_type.unique(), dft1.silk_type.unique(), key="diamfilter5"
+            "Silk type",
+            dft1.silk_type.unique(),
+            dft1.silk_type.unique(),
+            key="diamfilter5",
         )
         diameterfiltersample = st.multiselect(
             "Sample", dfs.id.unique(), dfs.id.unique(), key="diamfilter3"
@@ -282,6 +285,31 @@ with tabs[4]:
         )
     except Exception as e:
         st.write(e)
+        
+        
+    with tabs[6]:
+        import pygwalker as pyg
+        import streamlit.components.v1 as components
+
+        st.write("# Choose the dataframe to display")
+        
+        selecteddataframe = st.selectbox(
+        "Select a dataframe",
+        ["Sample", "Silk Trait"],
+        key="pygselectdf",
+        index=0,
+        )
+        
+        if selecteddataframe == "Sample":
+            pyg_html = pyg.walk(dfs, return_html=True)
+        
+        if selecteddataframe == "Silk Trait":
+            pyg_html = pyg.walk(dft1, return_html=True)
+        
+        # Embed the HTML into the Streamlit app
+        components.html(pyg_html, height=1000, scrolling=True)
+
+        
 # with tabs[0]:
 #     st.experimental_data_editor(
 #         dft1,
