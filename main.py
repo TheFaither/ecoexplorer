@@ -300,9 +300,8 @@ with tabs[4]:
         
         
     with tabs[6]:
-        st.set_page_config(layout="wide")
-
         st.write("# Choose the dataframe to display")
+        st.write("We suggest activating 'wide mode' by pressing the three dots on the top right corner of this screen and selecting Settings")
         
         selecteddataframe = st.selectbox(
         "Select a dataframe",
