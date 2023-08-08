@@ -12,6 +12,8 @@ import os
 import datetime
 import pandas as pd
 import numpy as np
+import pygwalker as pyg
+import streamlit.components.v1 as components
 
 full_path = os.path.join(".", "tempDir")
 os.makedirs(full_path, exist_ok=True)
@@ -298,8 +300,7 @@ with tabs[4]:
         
         
     with tabs[6]:
-        import pygwalker as pyg
-        import streamlit.components.v1 as components
+        st.set_page_config(layout="wide")
 
         st.write("# Choose the dataframe to display")
         
