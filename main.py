@@ -6,6 +6,7 @@ A visualizer for SuPerBase _by Daniele Liprandi_
 
 import streamlit as st
 import plotly.express as px
+
 # from sqlalchemy import create_engine
 import os
 import datetime
@@ -18,6 +19,7 @@ os.makedirs(full_path, exist_ok=True)
 
 conn = st.experimental_connection("local_db", type="sql", url="sqlite:///demoframe.sql")
 # engine = create_engine(url="sqlite:///demoDir/evonest.sql")
+
 
 def save_uploaded_file(uploadedfile):
     with open(os.path.join("tempDir", uploadedfile.name), "wb") as f:
@@ -37,7 +39,7 @@ if datafile is not None:
 
 
 dfi = conn.query("select * from investigator")
-dfs = conn.query("select * from sample") 
+dfs = conn.query("select * from sample")
 dfsindividuals = conn.query("select * from sample NATURAL JOIN individualsample")
 dft1 = conn.query(
     "select * from silktrait NATURAL JOIN trait INNER JOIN sample ON trait.samples_id = sample.id"
@@ -71,10 +73,10 @@ for dfnum, df in enumerate(dff):
             pass
 with tabs[0]:
     st.write("# Base Explorer\n" "by _Daniele Liprandi_\n")
-    st.write("A demo database is initially displayed. Please upload a database using the left sidebar")
     st.write(
-        "Visit the Silk Trait tab to see an analysis demonstration."
+        "A demo database is initially displayed. Please upload a database using the left sidebar"
     )
+    st.write("Visit the Silk Trait tab to see an analysis demonstration.")
 
 # ---------------------------------------------------------------------------- #
 #                                  sample page                                 #
@@ -91,9 +93,24 @@ with tabs[2]:
     st.plotly_chart(fighist)
     st.divider()
     # ------------------------------ collection tree ----------------------------- #
+    st.write("## Taxonomic Sample Tree Map")
     figcollectiontree = px.treemap(
         dfs,
         path=[px.Constant("all"), "family", "genus", "species"],
+    )
+    figcollectiontree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
+    figcollectiontree.update_traces(marker=dict(cornerradius=20))
+    st.plotly_chart(figcollectiontree)
+    st.divider()
+    st.write("## Tagged sample tree map")
+    with st.expander("Filters", expanded=False):
+        speciestagfilter = st.multiselect(
+            "Tags", dfs.tags.unique(), dfs.tags.unique(), key="tagfilter1"
+        )
+    #FIXME None is considered, but it shouldn't
+    figcollectiontree = px.treemap(
+        dfs.query("tags in @speciestagfilter"),
+        path=[px.Constant("all"), "family", "genus", "species", "tags"],
     )
     figcollectiontree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
     figcollectiontree.update_traces(marker=dict(cornerradius=20))
@@ -130,7 +147,16 @@ with tabs[3]:
     # -------------------------------- line chart -------------------------------- #
     optionindivtrait = st.selectbox(
         "Color by",
-        ["family", "genus", "species", "samples_id", "parent_id", "sample_class"],
+        [
+            "family",
+            "genus",
+            "species",
+            "samples_id",
+            "parent_id",
+            "sample_class",
+            "tags",
+            "silk_type",
+        ],
         key="optiongroupby_diameter",
         index=0,
     )
@@ -144,6 +170,12 @@ with tabs[3]:
             dfs.nomenclature.unique(),
             key="diamfilter2",
         )
+        diameterfiltertag = st.multiselect(
+            "Tag", dfs.tags.unique(), dfs.tags.unique(), key="diamfilter4"
+        )
+        diameterfiltersilktype = st.multiselect(
+            "Silk type", dft1.silk_type.unique(), dft1.silk_type.unique(), key="diamfilter5"
+        )
         diameterfiltersample = st.multiselect(
             "Sample", dfs.id.unique(), dfs.id.unique(), key="diamfilter3"
         )
@@ -153,12 +185,16 @@ with tabs[3]:
         max_value=datetime.datetime.fromisocalendar(2024, 1, 1),
         value=datetime.datetime.fromisocalendar(2022, 1, 1),
     )
-    nbinslider = st.slider('Number of histogram bins', min_value=1, max_value=100, value=20)
-    
+    nbinslider = st.slider(
+        "Number of histogram bins", min_value=1, max_value=100, value=20
+    )
+
     figtraithistd = px.histogram(
         dft1.query("family in @diameterfilterfamily")
         .query("nomenclature in @diameterfilterspecies")
         .query("id in @diameterfiltersample")
+        .query("tags in @diameterfiltertag")
+        .query("silk_type in @diameterfiltersilktype")
         .query("uploaddate > @startdated"),
         x="diameter",
         nbins=nbinslider,
@@ -166,8 +202,12 @@ with tabs[3]:
     )
     st.plotly_chart(figtraithistd)
     try:
-        st.write(f"Diameter statistics grouped by {optionindivtrait}")    
-        st.dataframe(dft1.groupby(optionindivtrait)["diameter"].describe(include=[np.number]).transpose())
+        st.write(f"Diameter statistics grouped by {optionindivtrait}")
+        st.dataframe(
+            dft1.groupby(optionindivtrait)["diameter"]
+            .describe(include=[np.number])
+            .transpose()
+        )
     except Exception as e:
         st.write(e)
 # ---------------------------------------------------------------------------- #
@@ -184,7 +224,7 @@ with tabs[4]:
     # --------------------------------- histogram -------------------------------- #
     optiongroupby = st.selectbox(
         "Color by",
-        ["family", "genus", "species", "samples_id"],
+        ["family", "genus", "species", "samples_id", "sample tag"],
         key="optiongroupby_mass",
         index=0,
     )
@@ -201,33 +241,45 @@ with tabs[4]:
         weightfiltersample = st.multiselect(
             "Sample", dfs.id.unique(), dfs.id.unique(), key="weifilter3"
         )
+        weightfiltertag = st.multiselect(
+            "Tag", dfs.tags.unique(), dfs.tags.unique(), key="weifilter4"
+        )
     startdate = st.slider(
         "Show only weight data uploaded after this date",
         min_value=datetime.datetime.fromisocalendar(2020, 1, 1),
         max_value=datetime.datetime.fromisocalendar(2024, 1, 1),
         value=datetime.datetime.fromisocalendar(2022, 1, 1),
     )
-    nbinslider = st.slider('Number of histogram bins', min_value=1, max_value=1000, value=20, key="individualbinsslider")
-    #minmaxdf = dft2.agg([min, max])
-    #mintraitval, maxtraitval = st.slider("Select range", value=[minmaxdf.loc["min",optionindivtrait],minmaxdf.loc["max",optionindivtrait]])
+    nbinslider = st.slider(
+        "Number of histogram bins",
+        min_value=1,
+        max_value=1000,
+        value=20,
+        key="individualbinsslider",
+    )
+    # minmaxdf = dft2.agg([min, max])
+    # mintraitval, maxtraitval = st.slider("Select range", value=[minmaxdf.loc["min",optionindivtrait],minmaxdf.loc["max",optionindivtrait]])
 
     figtraithist = px.histogram(
         dft2.query("family in @weightfilterfamily")
         .query("nomenclature in @weightfilterspecies")
         .query("id in @weightfiltersample")
+        .query("tags in @weightfiltertag")
         .query("uploaddate > @startdate"),
         x=optionindivtrait,
         nbins=nbinslider,
         color=optiongroupby,
         log_x=True,
-    ).update_layout(
-        xaxis_title="Body length (mm)"
-    )
+    ).update_layout(xaxis_title="Body length (mm)")
     st.plotly_chart(figtraithist)
 
     try:
-        st.write(f"{optionindivtrait} statistics grouped by {optiongroupby}")    
-        st.dataframe(dft2.groupby(optiongroupby)[optionindivtrait].describe(include=[np.number]).transpose())
+        st.write(f"{optionindivtrait} statistics grouped by {optiongroupby}")
+        st.dataframe(
+            dft2.groupby(optiongroupby)[optionindivtrait]
+            .describe(include=[np.number])
+            .transpose()
+        )
     except Exception as e:
         st.write(e)
 # with tabs[0]:
