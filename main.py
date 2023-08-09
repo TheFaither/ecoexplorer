@@ -48,7 +48,7 @@ dft1 = conn.query(
 )
 dft2 = conn.query(
     "select * from individualtrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id"
-) 
+)
 try:
     dft1[["uploaddate", "collectiondate"]] = dft1[
         ["uploaddate", "collectiondate"]
@@ -64,7 +64,15 @@ except Exception as e:
 dfe = conn.query("select * from experiment")
 dff = [dfi, dfs, dft1, dft2, dfe]
 tabs = st.tabs(
-    ["Home", "Investigator", "Sample", "Silk Trait", "Individual Trait", "Experiment", "Chart Generator"]
+    [
+        "Home",
+        "Investigator",
+        "Sample",
+        "Silk Trait",
+        "Individual Trait",
+        "Experiment",
+        "Chart Generator",
+    ]
 )
 
 for dfnum, df in enumerate(dff):
@@ -111,9 +119,7 @@ with tabs[2]:
         )
     # FIXME Tag None is considered, but it shouldn't. The best thing would be to clean all the nones in explorer
     figcollectiontreetag = px.treemap(
-        dfs
-        .query("tags in @speciestagfilter")
-        .query("tags.notnull()" ),
+        dfs.query("tags in @speciestagfilter").query("tags.notnull()"),
         path=[px.Constant("all"), "family", "genus", "species", "tags"],
     )
     figcollectiontreetag.update_layout(margin=dict(t=50, l=25, r=25, b=25))
@@ -197,8 +203,7 @@ with tabs[3]:
     )
 
     figtraithistd = px.histogram(
-        dft1
-        .query("family in @diameterfilterfamily")
+        dft1.query("family in @diameterfilterfamily")
         .query("nomenclature in @diameterfilterspecies")
         .query("id in @diameterfiltersample")
         .query("tags in @diameterfiltertag")
@@ -212,8 +217,7 @@ with tabs[3]:
     try:
         st.write(f"Diameter statistics grouped by {optionindivtrait}")
         st.dataframe(
-            dft1
-            .query("family in @diameterfilterfamily")
+            dft1.query("family in @diameterfilterfamily")
             .query("nomenclature in @diameterfilterspecies")
             .query("id in @diameterfiltersample")
             .query("tags in @diameterfiltertag")
@@ -261,7 +265,7 @@ with tabs[4]:
         )
     startdate = st.slider(
         "Show only weight data uploaded after this date",
-        min_value=datetime.datetime.fromisocalendar(2020, 1, 1),
+        min_value=datetime.datetime.fromisocalendar(2021, 1, 1),
         max_value=datetime.datetime.fromisocalendar(2024, 1, 1),
         value=datetime.datetime.fromisocalendar(2022, 1, 1),
     )
@@ -297,29 +301,30 @@ with tabs[4]:
         )
     except Exception as e:
         st.write(e)
-        
-        
+
     with tabs[6]:
         st.write("# Choose the dataframe to display")
-        st.write("We suggest activating 'wide mode' by pressing the three dots on the top right corner of this screen and selecting Settings")
-        
-        selecteddataframe = st.selectbox(
-        "Select a dataframe",
-        ["Sample", "Silk Trait"],
-        key="pygselectdf",
-        index=0,
+        st.write(
+            "We suggest activating 'wide mode' by pressing the three dots on the top right corner of this screen and selecting Settings"
         )
-        
+
+        selecteddataframe = st.selectbox(
+            "Select a dataframe",
+            ["Sample", "Silk Trait"],
+            key="pygselectdf",
+            index=0,
+        )
+
         if selecteddataframe == "Sample":
             pyg_html = pyg.walk(dfs, return_html=True)
-        
+
         if selecteddataframe == "Silk Trait":
             pyg_html = pyg.walk(dft1, return_html=True)
-        
+
         # Embed the HTML into the Streamlit app
         components.html(pyg_html, height=1000, scrolling=True)
 
-        
+
 # with tabs[0]:
 #     st.experimental_data_editor(
 #         dft1,
