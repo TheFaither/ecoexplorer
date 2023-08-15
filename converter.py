@@ -58,12 +58,14 @@ def extract_text(s : str, start : str, end : str):
 # -------------------------------- functions --------------------------------- #
 
 
-def extractAttributesAndData(inputfile):
+def extractAttributesAndData(inputfilestring : str):
+    # remove \r\n
+    inputfilestring = inputfilestring.replace("\r\n", "\n")
     # -------------------------------- Attributes -------------------------------- #
     attribute = dict()
     # ------------------------------ Test Definition ----------------------------- #
     datatext = extract_text(
-        inputfile, '"TestWorks Nano Test Data File"\r\n', "\r\nSegment Definition"
+        inputfilestring, '"TestWorks Nano Test Data File"\n', "\nSegment Definition"
     )
     colsdefin = dict(
         [
@@ -73,7 +75,7 @@ def extractAttributesAndData(inputfile):
     )
     attribute.update(colsdefin)
     # ---------------------------- Segment Definition ---------------------------- #
-    datatext = extract_text(inputfile, "Segment Definition\r\n", "\r\nEnd")
+    datatext = extract_text(inputfilestring, "Segment Definition\n", "\nEnd")
     colssegmentinverted = [
         line.replace(" ", "").replace('"', "").replace(" ", "").split(",")
         for line in datatext.splitlines()
@@ -85,7 +87,7 @@ def extractAttributesAndData(inputfile):
     )
 
     # ----------------------------------- Array ---------------------------------- #
-    datatext = extract_text(inputfile, '"Channel Data"\r\n', "\r\n\r\n\r\n")
+    datatext = extract_text(inputfilestring, '"Channel Data"\n', "\n\n\n")
     cols = [
         line.replace('"', "").replace(" ", "").split(",")
         for line in datatext.splitlines()
