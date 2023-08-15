@@ -82,7 +82,8 @@ for dfnum, df in enumerate(dff):
         try:
             st.dataframe(df)
         except Exception as e:
-            pass
+            st.write(e)
+
 with tabs[0]:
     st.write("# EvoNEST Explorer\n" "by _Daniele Liprandi_\n")
     st.write(
