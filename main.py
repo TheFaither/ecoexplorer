@@ -203,12 +203,13 @@ with tabs[3]:
     nbinslider = st.slider(
         "Number of histogram bins", min_value=1, max_value=100, value=20
     )
-    st.write(dft1.query("family in @diameterfilterfamily")
-        .query("nomenclature in @diameterfilterspecies")
-        .query("id in @diameterfiltersample")
-        .query("tags in @diameterfiltertag")
-        .query("silk_type in @diameterfiltersilktype")
-        .query("uploaddate > @startdated"))
+    # st.dataframe(dft1.query("family in @diameterfilterfamily")
+    #     .query("nomenclature in @diameterfilterspecies")
+    #     .query("id in @diameterfiltersample")
+    #     .query("tags in @diameterfiltertag")
+    #     .query("silk_type in @diameterfiltersilktype")
+    #     .query("uploaddate > @startdated")
+    #     )
 
     figtraithistd = px.histogram(
         dft1.query("family in @diameterfilterfamily")
