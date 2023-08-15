@@ -14,6 +14,7 @@ import pandas as pd
 import numpy as np
 import pygwalker as pyg
 import streamlit.components.v1 as components
+from converter import getattributesandmeasureformultiplefiles
 
 full_path = os.path.join(".", "tempDir")
 os.makedirs(full_path, exist_ok=True)
@@ -72,6 +73,7 @@ tabs = st.tabs(
         "Individual Trait",
         "Experiment",
         "Chart Generator",
+        "Tensile test converter"
     ]
 )
 
@@ -302,6 +304,9 @@ with tabs[4]:
     except Exception as e:
         st.write(e)
 
+    # ---------------------------------------------------------------------------- #
+    #                                chart generator                               #
+    # ---------------------------------------------------------------------------- #
     with tabs[6]:
         st.write("# Choose the dataframe to display")
         st.write(
@@ -323,6 +328,33 @@ with tabs[4]:
 
         # Embed the HTML into the Streamlit app
         components.html(pyg_html, height=1000, scrolling=True)
+    # ---------------------------------------------------------------------------- #
+    #                            tensile test converter                            #
+    # ---------------------------------------------------------------------------- #
+    with tabs[7]:
+        from io import StringIO, BytesIO
+        buffer = BytesIO()
+
+        @st.cache_resource
+        def convert_df(measures : list[pd.DataFrame]):
+            with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer: 
+                for index, measure in enumerate(measures): 
+                    measure.to_excel(writer, sheet_name='Sheet_name_'+str(index))
+        
+        st.write("# Drop here the files to be converted")
+        files = st.file_uploader(label="txt files", accept_multiple_files=True)
+        convert = st.button("Convert")
+        conv = []
+        if convert:
+            if len(files) > 0:
+                for file in files:
+                    conv.append(StringIO(file.getvalue().decode("utf-8")))
+            [measures, attributes] = getattributesandmeasureformultiplefiles(
+                conv
+            )
+            convert_df(measures)
+        st.download_button("Download", buffer.getvalue(), file_name="converted.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        
 
 
 # with tabs[0]:
