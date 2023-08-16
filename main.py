@@ -50,6 +50,9 @@ dft1 = conn.query(
 dft2 = conn.query(
     "select * from individualtrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id"
 )
+dftensile = conn.query(
+    "select * from tensileexperiment NATURAL JOIN experiment"
+)
 try:
     dft1[["uploaddate", "collectiondate"]] = dft1[
         ["uploaddate", "collectiondate"]
@@ -312,57 +315,66 @@ with tabs[4]:
     except Exception as e:
         st.write(e)
 
-    # ---------------------------------------------------------------------------- #
-    #                                chart generator                               #
-    # ---------------------------------------------------------------------------- #
-    with tabs[6]:
-        st.write("# Choose the dataframe to display")
-        st.write(
-            "We suggest activating 'wide mode' by pressing the three dots on the top right corner of this screen and selecting Settings"
+# ---------------------------------------------------------------------------- #
+#                                  experiments                                 #
+# ---------------------------------------------------------------------------- #
+with tabs[5]:
+    st.write("# Experiments")
+    tensileselector = st.multiselect(
+            "Experiment", dftensile.id.unique(), dftensile.id.unique(), key="tensileselector"
         )
+    jsondf = str(dftensile.query("id in @tensileselector").measure.iloc[0]).replace("\\\"", "\'")
+    print(jsondf[0:200])
+    currentdf = pd.read_json(jsondf, orient="split")
+    tensileplot = px.scatter(currentdf, x="EngineeringStrain", y="LoadOnSpecimen")
+    st.plotly_chart(tensileplot)
 
-        selecteddataframe = st.selectbox(
-            "Select a dataframe",
-            ["Sample", "Silk Trait"],
-            key="pygselectdf",
-            index=0,
+# ---------------------------------------------------------------------------- #
+#                                chart generator                               #
+# ---------------------------------------------------------------------------- #
+with tabs[6]:
+    st.write("# Choose the dataframe to display")
+    st.write(
+        "We suggest activating 'wide mode' by pressing the three dots on the top right corner of this screen and selecting Settings"
+    )
+    selecteddataframe = st.selectbox(
+        "Select a dataframe",
+        ["Sample", "Silk Trait"],
+        key="pygselectdf",
+        index=0,
+    )
+    if selecteddataframe == "Sample":
+        pyg_html = pyg.walk(dfs, return_html=True)
+    if selecteddataframe == "Silk Trait":
+        pyg_html = pyg.walk(dft1, return_html=True)
+    # Embed the HTML into the Streamlit app
+    components.html(pyg_html, height=1000, scrolling=True)
+# ---------------------------------------------------------------------------- #
+#                            tensile test converter                            #
+# ---------------------------------------------------------------------------- #
+with tabs[7]:
+    from io import StringIO, BytesIO
+    buffer = BytesIO()
+    @st.cache_resource
+    def convert_df(measures : list[pd.DataFrame]):
+        with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer: 
+            for index, measure in enumerate(measures): 
+                measure.to_excel(writer, sheet_name='Sheet_name_'+str(index))
+    
+    st.write("# Drop here the files to be converted")
+    files = st.file_uploader(label="txt files", accept_multiple_files=True)
+    convert = st.button("Convert")
+    conv = []
+    if convert:
+        if len(files) > 0:
+            for file in files:
+                conv.append(StringIO(file.getvalue().decode("utf-8")))
+        [measures, attributes] = getattributesandmeasureformultiplefiles(
+            conv
         )
-
-        if selecteddataframe == "Sample":
-            pyg_html = pyg.walk(dfs, return_html=True)
-
-        if selecteddataframe == "Silk Trait":
-            pyg_html = pyg.walk(dft1, return_html=True)
-
-        # Embed the HTML into the Streamlit app
-        components.html(pyg_html, height=1000, scrolling=True)
-    # ---------------------------------------------------------------------------- #
-    #                            tensile test converter                            #
-    # ---------------------------------------------------------------------------- #
-    with tabs[7]:
-        from io import StringIO, BytesIO
-        buffer = BytesIO()
-
-        @st.cache_resource
-        def convert_df(measures : list[pd.DataFrame]):
-            with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer: 
-                for index, measure in enumerate(measures): 
-                    measure.to_excel(writer, sheet_name='Sheet_name_'+str(index))
-        
-        st.write("# Drop here the files to be converted")
-        files = st.file_uploader(label="txt files", accept_multiple_files=True)
-        convert = st.button("Convert")
-        conv = []
-        if convert:
-            if len(files) > 0:
-                for file in files:
-                    conv.append(StringIO(file.getvalue().decode("utf-8")))
-            [measures, attributes] = getattributesandmeasureformultiplefiles(
-                conv
-            )
-            convert_df(measures)
-        st.download_button("Download", buffer.getvalue(), file_name="converted.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        
+        convert_df(measures)
+    st.download_button("Download", buffer.getvalue(), file_name="converted.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    
 
 
 # with tabs[0]:
