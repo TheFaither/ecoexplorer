@@ -320,13 +320,19 @@ with tabs[4]:
 # ---------------------------------------------------------------------------- #
 with tabs[5]:
     st.write("# Experiments")
+    import plotly.graph_objects as go
     tensileselector = st.multiselect(
             "Experiment", dftensile.id.unique(), dftensile.id.unique(), key="tensileselector"
         )
-    jsondf = str(dftensile.query("id in @tensileselector").measure.iloc[0]).replace("\\\"", "\'")
-    print(jsondf[0:200])
-    currentdf = pd.read_json(jsondf, orient="split")
-    tensileplot = px.scatter(currentdf, x="EngineeringStrain", y="LoadOnSpecimen")
+    dfjson = pd.DataFrame(columns=["EngineeringStrain","EngineeringStress","LoadOnSpecimen","Time"])
+    id = int(0)
+    for measure in dftensile.query("id in @tensileselector").measure:
+        currentdf = pd.read_json(measure, orient="split")
+        currentdf["id"] = str(id)
+        id += 1 
+        dfjson = pd.concat([dfjson, currentdf])
+        
+    tensileplot = px.scatter(dfjson, x="EngineeringStrain", y="LoadOnSpecimen", color="id")
     st.plotly_chart(tensileplot)
 
 # ---------------------------------------------------------------------------- #
