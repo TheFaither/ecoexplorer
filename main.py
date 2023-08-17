@@ -45,14 +45,15 @@ dfi = conn.query("select * from investigator")
 dfs = conn.query("select * from sample")
 dfsindividuals = conn.query("select * from sample NATURAL JOIN individualsample")
 dft1 = conn.query(
-    "select * from silktrait NATURAL JOIN trait INNER JOIN sample ON trait.samples_id = sample.id"
+    "select silktrait.id, trait.samples_id, silktrait.silk_type, sample.tag as sample_tag, silktrait.diameter, silktrait.diameter_std, silktrait.diameter_listvals, trait.uploaddate, sample.collectiondate, trait.responsible_id, trait.tag as trait_tag, sample.family, sample.genus, sample.species, sample.nomenclature, sample.parent_id from silktrait NATURAL JOIN trait INNER JOIN sample ON trait.samples_id = sample.id"
 )
 dft2 = conn.query(
     "select * from individualtrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id"
 )
-dftensile = conn.query(
-    "select * from tensileexperiment NATURAL JOIN experiment"
-)
+try:
+    dftensile = conn.query("select * from tensileexperiment NATURAL JOIN experiment")
+except:
+    ...
 try:
     dft1[["uploaddate", "collectiondate"]] = dft1[
         ["uploaddate", "collectiondate"]
@@ -76,7 +77,7 @@ tabs = st.tabs(
         "Individual Trait",
         "Experiment",
         "Chart Generator",
-        "Tensile test converter"
+        "Tensile test converter",
     ]
 )
 
@@ -98,7 +99,7 @@ with tabs[0]:
 #                                  sample page                                 #
 # ---------------------------------------------------------------------------- #
 with tabs[2]:
-    with st.expander("Individuals", expanded=False):
+    with st.expander("Animals", expanded=False):
         st.write(dfsindividuals)
     # ------------------------------------ map ----------------------------------- #
     dfsmap = dfs.dropna(subset="latitude")
@@ -121,12 +122,12 @@ with tabs[2]:
     st.write("## Tagged sample tree map")
     with st.expander("Filters", expanded=False):
         speciestagfilter = st.multiselect(
-            "Tags", dfs.tags.unique(), dfs.tags.unique(), key="tagfilter1"
+            "Tags", dfs.tag.unique(), dfs.tag.unique(), key="tagfilter1"
         )
     # FIXME Tag None is considered, but it shouldn't. The best thing would be to clean all the nones in explorer
     figcollectiontreetag = px.treemap(
-        dfs.query("tags in @speciestagfilter").query("tags.notnull()"),
-        path=[px.Constant("all"), "family", "genus", "species", "tags"],
+        dfs.query("tag in @speciestagfilter").query("tag.notnull()"),
+        path=[px.Constant("all"), "family", "genus", "species", "tag"],
     )
     figcollectiontreetag.update_layout(margin=dict(t=50, l=25, r=25, b=25))
     figcollectiontreetag.update_traces(marker=dict(cornerradius=20))
@@ -170,7 +171,7 @@ with tabs[3]:
             "samples_id",
             "parent_id",
             "sample_class",
-            "tags",
+            "sample_tag",
             "silk_type",
         ],
         key="optiongroupby_diameter",
@@ -182,12 +183,12 @@ with tabs[3]:
         )
         diameterfilterspecies = st.multiselect(
             "Species",
-            dfs.nomenclature.unique(),
-            dfs.nomenclature.unique(),
+            dfs.query("family in @diameterfilterfamily").nomenclature.unique(),
+            dfs.query("family in @diameterfilterfamily").nomenclature.unique(),
             key="diamfilter2",
         )
         diameterfiltertag = st.multiselect(
-            "Tag", dfs.tags.unique(), dfs.tags.unique(), key="diamfilter4"
+            "Tag", dfs.tag.unique(), dfs.tag.unique(), key="diamfilter4"
         )
         diameterfiltersilktype = st.multiselect(
             "Silk type",
@@ -196,10 +197,10 @@ with tabs[3]:
             key="diamfilter5",
         )
         diameterfiltersample = st.multiselect(
-            "Sample", dfs.id.unique(), dfs.id.unique(), key="diamfilter3"
+            "Sample", dfs.query("family in @diameterfilterfamily").query("sample_class in 'silksample'").id.unique(), dfs.query("family in @diameterfilterfamily").query("sample_class in 'silksample'").id.unique(), key="diamfilter3"
         )
     startdated = st.slider(
-        "Show only diameter rdata uploaded after this date",
+        "Show only diameter  for data uploaded after this date",
         min_value=datetime.datetime.fromisocalendar(2020, 1, 1),
         max_value=datetime.datetime.fromisocalendar(2024, 1, 1),
         value=datetime.datetime.fromisocalendar(2022, 1, 1),
@@ -207,19 +208,12 @@ with tabs[3]:
     nbinslider = st.slider(
         "Number of histogram bins", min_value=1, max_value=100, value=20
     )
-    # st.dataframe(dft1.query("family in @diameterfilterfamily")
-    #     .query("nomenclature in @diameterfilterspecies")
-    #     .query("id in @diameterfiltersample")
-    #     .query("tags in @diameterfiltertag")
-    #     .query("silk_type in @diameterfiltersilktype")
-    #     .query("uploaddate > @startdated")
-    #     )
 
     figtraithistd = px.histogram(
         dft1.query("family in @diameterfilterfamily")
         .query("nomenclature in @diameterfilterspecies")
-        .query("id in @diameterfiltersample")
-        .query("tags in @diameterfiltertag")
+        .query("samples_id in @diameterfiltersample")
+        .query("sample_tag in @diameterfiltertag")
         .query("silk_type in @diameterfiltersilktype")
         .query("uploaddate > @startdated"),
         x="diameter",
@@ -227,13 +221,20 @@ with tabs[3]:
         color=optionindivtrait,
     )
     st.plotly_chart(figtraithistd)
+    st.dataframe(dft1.query("family in @diameterfilterfamily")
+        .query("nomenclature in @diameterfilterspecies")
+        .query("samples_id in @diameterfiltersample")
+        .query("sample_tag in @diameterfiltertag")
+        .query("silk_type in @diameterfiltersilktype")
+        .query("uploaddate > @startdated")
+        )
     try:
         st.write(f"Diameter statistics grouped by {optionindivtrait}")
         st.dataframe(
             dft1.query("family in @diameterfilterfamily")
             .query("nomenclature in @diameterfilterspecies")
-            .query("id in @diameterfiltersample")
-            .query("tags in @diameterfiltertag")
+            .query("samples_id in @diameterfiltersample")
+            .query("sample_tag in @diameterfiltertag")
             .query("silk_type in @diameterfiltersilktype")
             .query("uploaddate > @startdated")
             .groupby(optionindivtrait)["diameter"]
@@ -274,7 +275,7 @@ with tabs[4]:
             "Sample", dfs.id.unique(), dfs.id.unique(), key="weifilter3"
         )
         weightfiltertag = st.multiselect(
-            "Tag", dfs.tags.unique(), dfs.tags.unique(), key="weifilter4"
+            "Tag", dfs.tag.unique(), dfs.tag.unique(), key="weifilter4"
         )
     startdate = st.slider(
         "Show only weight data uploaded after this date",
@@ -296,7 +297,7 @@ with tabs[4]:
         dft2.query("family in @weightfilterfamily")
         .query("nomenclature in @weightfilterspecies")
         .query("id in @weightfiltersample")
-        .query("tags in @weightfiltertag")
+        .query("tag in @weightfiltertag")
         .query("uploaddate > @startdate"),
         x=optionindivtrait,
         nbins=nbinslider,
@@ -318,23 +319,32 @@ with tabs[4]:
 # ---------------------------------------------------------------------------- #
 #                                  experiments                                 #
 # ---------------------------------------------------------------------------- #
-with tabs[5]:
-    st.write("# Experiments")
-    import plotly.graph_objects as go
-    tensileselector = st.multiselect(
-            "Experiment", dftensile.id.unique(), dftensile.id.unique(), key="tensileselector"
-        )
-    dfjson = pd.DataFrame(columns=["EngineeringStrain","EngineeringStress","LoadOnSpecimen","Time"])
-    id = int(0)
-    for measure in dftensile.query("id in @tensileselector").measure:
-        currentdf = pd.read_json(measure, orient="split")
-        currentdf["id"] = str(id)
-        id += 1 
-        dfjson = pd.concat([dfjson, currentdf])
-        
-    tensileplot = px.scatter(dfjson, x="EngineeringStrain", y="LoadOnSpecimen", color="id")
-    st.plotly_chart(tensileplot)
+try:
+    with tabs[5]:
+        st.write("# Experiments")
 
+        tensileselector = st.multiselect(
+            "Experiment",
+            dftensile.id.unique(),
+            dftensile.id.unique(),
+            key="tensileselector",
+        )
+        dfjson = pd.DataFrame(
+            columns=["EngineeringStrain", "EngineeringStress", "LoadOnSpecimen", "Time"]
+        )
+        id = int(0)
+        for measure in dftensile.query("id in @tensileselector").measure:
+            currentdf = pd.read_json(measure, orient="split")
+            currentdf["id"] = str(id)
+            id += 1
+            dfjson = pd.concat([dfjson, currentdf])
+
+        tensileplot = px.scatter(
+            dfjson, x="EngineeringStrain", y="LoadOnSpecimen", color="id"
+        )
+        st.plotly_chart(tensileplot)
+except:
+    ...
 # ---------------------------------------------------------------------------- #
 #                                chart generator                               #
 # ---------------------------------------------------------------------------- #
@@ -360,13 +370,15 @@ with tabs[6]:
 # ---------------------------------------------------------------------------- #
 with tabs[7]:
     from io import StringIO, BytesIO
+
     buffer = BytesIO()
+
     @st.cache_resource
-    def convert_df(measures : list[pd.DataFrame]):
-        with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer: 
-            for index, measure in enumerate(measures): 
-                measure.to_excel(writer, sheet_name='Sheet_name_'+str(index))
-    
+    def convert_df(measures: list[pd.DataFrame]):
+        with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+            for index, measure in enumerate(measures):
+                measure.to_excel(writer, sheet_name="Sheet_name_" + str(index))
+
     st.write("# Drop here the files to be converted")
     files = st.file_uploader(label="txt files", accept_multiple_files=True)
     convert = st.button("Convert")
@@ -375,12 +387,14 @@ with tabs[7]:
         if len(files) > 0:
             for file in files:
                 conv.append(StringIO(file.getvalue().decode("utf-8")))
-        [measures, attributes] = getattributesandmeasureformultiplefiles(
-            conv
-        )
+        [measures, attributes] = getattributesandmeasureformultiplefiles(conv)
         convert_df(measures)
-    st.download_button("Download", buffer.getvalue(), file_name="converted.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    
+    st.download_button(
+        "Download",
+        buffer.getvalue(),
+        file_name="converted.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
 
 
 # with tabs[0]:
