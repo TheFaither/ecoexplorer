@@ -296,8 +296,8 @@ with tabs[4]:
     figtraithist = px.histogram(
         dft2.query("family in @weightfilterfamily")
         .query("nomenclature in @weightfilterspecies")
-        .query("id in @weightfiltersample")
-        .query("tag in @weightfiltertag")
+        .query("sample_id in @weightfiltersample")
+        .query("sample_tag in @weightfiltertag")
         .query("uploaddate > @startdate"),
         x=optionindivtrait,
         nbins=nbinslider,
