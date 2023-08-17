@@ -48,7 +48,7 @@ dft1 = conn.query(
     "select silktrait.id, trait.samples_id, silktrait.silk_type, sample.tag as sample_tag, silktrait.diameter, silktrait.diameter_std, silktrait.diameter_listvals, trait.uploaddate, sample.collectiondate, trait.responsible_id, trait.tag as trait_tag, sample.family, sample.genus, sample.species, sample.nomenclature, sample.parent_id from silktrait NATURAL JOIN trait INNER JOIN sample ON trait.samples_id = sample.id"
 )
 dft2 = conn.query(
-    "select individualtrait.id, individualtrait.weight, sample.tag as sample_tag, trait.uploaddate, sample.collectiondate, trait.responsible_id, trait.tag as trait_tag, sample.family, sample.genus, sample.species, sample.nomenclature, sample.parent_id from individualtrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id"
+    "select individualtrait.id, trait.samples_id, individualtrait.weight, sample.tag as sample_tag, trait.uploaddate, sample.collectiondate, trait.responsible_id, trait.tag as trait_tag, sample.family, sample.genus, sample.species, sample.nomenclature, sample.parent_id from individualtrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id"
 )
 try:
     dftensile = conn.query("select * from tensileexperiment NATURAL JOIN experiment")
@@ -296,7 +296,7 @@ with tabs[4]:
     figtraithist = px.histogram(
         dft2.query("family in @weightfilterfamily")
         .query("nomenclature in @weightfilterspecies")
-        .query("sample_id in @weightfiltersample")
+        .query("samples_id in @weightfiltersample")
         .query("sample_tag in @weightfiltertag")
         .query("uploaddate > @startdate"),
         x=optionindivtrait,
