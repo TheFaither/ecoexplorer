@@ -48,7 +48,7 @@ dft1 = conn.query(
     "select silktrait.id, trait.samples_id, silktrait.silk_type, sample.tag as sample_tag, silktrait.diameter, silktrait.diameter_std, silktrait.diameter_listvals, trait.uploaddate, sample.collectiondate, trait.responsible_id, trait.tag as trait_tag, sample.family, sample.genus, sample.species, sample.nomenclature, sample.parent_id from silktrait NATURAL JOIN trait INNER JOIN sample ON trait.samples_id = sample.id"
 )
 dft2 = conn.query(
-    "select individualtrait.weight, individualtrait.body_length, sample.tag as sample_tag, trait.uploaddate, sample.collectiondate, trait.responsible_id, trait.tag as trait_tag, sample.family, sample.genus, sample.species, sample.nomenclature, sample.parent_id from individualtrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id"
+    "select individualtrait.weight, sample.tag as sample_tag, trait.uploaddate, sample.collectiondate, trait.responsible_id, trait.tag as trait_tag, sample.family, sample.genus, sample.species, sample.nomenclature, sample.parent_id from individualtrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id"
 )
 try:
     dftensile = conn.query("select * from tensileexperiment NATURAL JOIN experiment")
