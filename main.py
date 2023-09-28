@@ -210,7 +210,7 @@ with tabs[3]:
     )
     figdiametertreetag = px.treemap(
         dft1.query("sample_tag.notnull()"),
-        path=[px.Constant("all"), "genus", "sample_tag", "silk_type"],
+        path=[px.Constant("all"), optionindivtrait, "sample_tag", "silk_type"],
     )
     figdiametertreetag.update_layout(margin=dict(t=50, l=25, r=25, b=25))
     figdiametertreetag.update_traces(marker=dict(cornerradius=20))
