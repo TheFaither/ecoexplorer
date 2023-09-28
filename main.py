@@ -208,6 +208,13 @@ with tabs[3]:
     nbinslider = st.slider(
         "Number of histogram bins", min_value=1, max_value=100, value=20
     )
+    figdiametertreetag = px.treemap(
+        dft1.query("sample_tag.notnull()"),
+        path=[px.Constant("all"), "genus", "sample_tag", "silk_type"],
+    )
+    figdiametertreetag.update_layout(margin=dict(t=50, l=25, r=25, b=25))
+    figdiametertreetag.update_traces(marker=dict(cornerradius=20))
+    st.plotly_chart(figdiametertreetag)
 
     figtraithistd = px.histogram(
         dft1.query("family in @diameterfilterfamily")
