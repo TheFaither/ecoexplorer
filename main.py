@@ -101,6 +101,14 @@ with tabs[0]:
 with tabs[2]:
     with st.expander("Animals", expanded=False):
         st.write(dfsindividuals)
+        animalcollectiontree = px.treemap(
+        dfsindividuals,
+        path=[px.Constant("all"), "family", "genus", "species"],
+        )
+        animalcollectiontree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
+        animalcollectiontree.update_traces(marker=dict(cornerradius=20))
+        st.plotly_chart(animalcollectiontree)
+
     # ------------------------------------ map ----------------------------------- #
     dfsmap = dfs.dropna(subset="latitude")
     st.map(data=dfsmap)
