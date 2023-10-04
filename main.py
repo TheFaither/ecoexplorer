@@ -84,6 +84,7 @@ tabs = st.tabs(
         "Experiment",
         "Chart Generator",
         "Tensile test converter",
+        "Experimental"
     ]
 )
 
@@ -418,7 +419,12 @@ with tabs[7]:
     )
 
 
-# with tabs[0]:
+# ---------------------------------------------------------------------------- #
+#                                 Experimental                                 #
+# ---------------------------------------------------------------------------- #
+with tabs[8]:
+    st.data_editor(dfs)
+
 #     st.experimental_data_editor(
 #         dft1,
 #         width=None,
