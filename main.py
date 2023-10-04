@@ -426,7 +426,7 @@ with tabs[7]:
 # ---------------------------------------------------------------------------- #
 with tabs[8]:
     editeddfs = st.data_editor(dfs)
-    editeddfs.to_sql("sample", conn, if_exists="replace")
+    # editeddfs.to_sql("sample", conn, if_exists="replace")
 #     st.experimental_data_editor(
 #         dft1,
 #         width=None,
