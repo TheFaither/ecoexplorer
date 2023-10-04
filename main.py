@@ -40,12 +40,12 @@ if datafile is not None:
         "local_db", type="sql", url="sqlite:///tempDir/" + datafile.name
     )
     
-# with open(os.path.join("tempDir", datafile.name), "rb") as f:
-#     st.sidebar.download_button(
-#         label="Download database",
-#         data=f,
-#         file_name="database.sqlite"
-#     )
+with open(os.path.join("tempDir", "evonest.sqlite"), "rb") as f:
+    st.sidebar.download_button(
+        label="Download database",
+        data=f,
+        file_name="database.sqlite"
+    )
 
 
 
@@ -425,13 +425,14 @@ with tabs[7]:
 #                                 Experimental                                 #
 # ---------------------------------------------------------------------------- #
 with tabs[8]:
-    editeddfs = st.data_editor(dfs)
-    # editeddfs.to_sql("sample", conn, if_exists="replace")
+    editeddfs = st.data_editor(
+        dfs,
+        on_change=dfs.to_sql("sample", conn, if_exists='replace'),
+        )
 #     st.experimental_data_editor(
 #         dft1,
 #         width=None,
 #         height=None,
 #         use_container_width=False,
 #         num_rows="dynamic",
-#         on_change=dfs.to_sql("sample", engine, if_exists='replace'),
 #     )
