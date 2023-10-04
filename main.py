@@ -42,7 +42,7 @@ if datafile is not None:
     
     st.sidebar.download_button(
         label="Download database",
-        data=os.path.join("tempDir", datafile.name),
+        data=os.path.join("tempDir/", datafile.name),
         file_name="database.sqlite"
     )
 
