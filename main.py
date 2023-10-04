@@ -40,7 +40,7 @@ if datafile is not None:
         "local_db", type="sql", url="sqlite:///tempDir/" + datafile.name
     )
     
-with open(os.path.join("tempDir", datafile.name), "r") as f:
+with open(os.path.join("tempDir", datafile.name), "rb") as f:
     st.sidebar.download_button(
         label="Download database",
         data=f,
