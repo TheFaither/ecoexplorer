@@ -39,6 +39,12 @@ if datafile is not None:
     conn = st.experimental_connection(
         "local_db", type="sql", url="sqlite:///tempDir/" + datafile.name
     )
+    
+st.sidebar.download_button(
+    label="Download database",
+    data=datafile,
+    file_name="database.sqlite"
+)
 
 
 dfi = conn.query("select * from investigator")
