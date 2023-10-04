@@ -20,7 +20,7 @@ full_path = os.path.join(".", "tempDir")
 os.makedirs(full_path, exist_ok=True)
 
 
-conn = st.experimental_connection("local_db", type="sql", url="sqlite:///demoframe.sql")
+conn = st.experimental_connection("local_db", type="sql", url="sqlite:///demoframe.sql", autocommit=True)
 # engine = create_engine(url="sqlite:///demoDir/evonest.sql")
 
 
@@ -425,10 +425,11 @@ with tabs[7]:
 #                                 Experimental                                 #
 # ---------------------------------------------------------------------------- #
 with tabs[8]:
+    ...
     # editeddfs = st.data_editor(
-    #     dfs,
-    #     on_change=dfs.to_sql("sample", conn, if_exists='replace'),
-    #     )
+    #    dfs,
+    #    on_change=conn.session.execute(),
+    #    )
 #     st.experimental_data_editor(
 #         dft1,
 #         width=None,
