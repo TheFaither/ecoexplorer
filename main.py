@@ -27,11 +27,6 @@ conn = st.experimental_connection("local_db", type="sql", url="sqlite:///demofra
 def save_uploaded_file(uploadedfile):
     with open(os.path.join("tempDir", uploadedfile.name), "wb") as f:
         f.write(uploadedfile.getbuffer())
-        st.sidebar.download_button(
-            label="Download database",
-            data=os.path.join("tempDir", uploadedfile.name),
-            file_name="database.sqlite"
-        )
     return st.sidebar.success("Open file :{} in tempDir".format(uploadedfile.name))
 
 
@@ -45,6 +40,15 @@ if datafile is not None:
         "local_db", type="sql", url="sqlite:///tempDir/" + datafile.name
     )
     
+try:
+    with open(os.path.join("tempDir", datafile.name), "r") as f:
+        st.sidebar.download_button(
+            label="Download database",
+            data=f,
+            file_name="database.sqlite"
+        )
+except:
+    ...
     
 
 
