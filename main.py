@@ -40,16 +40,13 @@ if datafile is not None:
         "local_db", type="sql", url="sqlite:///tempDir/" + datafile.name
     )
     
-try:
-    with open(os.path.join("tempDir", datafile.name), "r") as f:
-        st.sidebar.download_button(
-            label="Download database",
-            data=f,
-            file_name="database.sqlite"
-        )
-except:
-    ...
-    
+with open(os.path.join("tempDir", datafile.name), "r") as f:
+    st.sidebar.download_button(
+        label="Download database",
+        data=f,
+        file_name="database.sqlite"
+    )
+
 
 
 dfi = conn.query("select * from investigator")
