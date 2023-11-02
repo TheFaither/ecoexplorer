@@ -413,6 +413,39 @@ with tabs[7]:
                 conv.append(StringIO(file.getvalue().decode("utf-8")))
         [measures, attributes] = getattributesandmeasureformultiplefiles(conv)
         convert_df(measures)
+        st.write(attributes)
+        id = int(0)
+        for measure in measures:
+            currentdf = measure
+            currentdf["id"] = str(id)
+            if id == 0:
+                dfplot = currentdf
+            else:
+                dfplot = pd.concat([dfplot, currentdf])
+            id += 1
+            
+        excelplot = px.line(
+            dfplot, x="EngineeringStrain", y="LoadOnSpecimen", color="id"
+        )
+        st.plotly_chart(excelplot)
+#        dfstrength = dict()
+#        dftough = dict()
+#        for index, attribute in enumerate(attributes):
+#            dfstrength[index] = attribute["StressAtBreak"]
+#            dftough[index] = attribute["Toughness"]
+#            print(dfstrength)
+#        
+#        
+#        stressplot = px.scatter(
+#            pd.DataFrame(data=dfstrength, index=0)
+#        )
+#        
+#        toughplot = px.scatter(
+#            pd.DataFrame(data=dftough, index=0)
+#        )
+#        st.plotly_chart(stressplot)
+#        st.plotly_chart(toughplot)
+
     st.download_button(
         "Download",
         buffer.getvalue(),

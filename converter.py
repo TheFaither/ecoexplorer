@@ -65,7 +65,7 @@ def extractAttributesAndData(inputfilestring : str):
     attribute = dict()
     # ------------------------------ Test Definition ----------------------------- #
     datatext = extract_text(
-        inputfilestring, '"TestWorks Nano Test Data File"\n', "\nSegment Definition"
+        inputfilestring, 'EVOMECT150NanoTestDataFile\n', "\n\nVariables"
     )
     colsdefin = dict(
         [
@@ -75,19 +75,21 @@ def extractAttributesAndData(inputfilestring : str):
     )
     attribute.update(colsdefin)
     # ---------------------------- Segment Definition ---------------------------- #
-    datatext = extract_text(inputfilestring, "Segment Definition\n", "\nEnd")
-    colssegmentinverted = [
-        line.replace(" ", "").replace('"', "").replace(" ", "").split(",")
-        for line in datatext.splitlines()
-    ]
-    attribute.update({item[1]: item[0] for item in colssegmentinverted})
-    # -------------------------------- ID MEASURE -------------------------------- #
-    attribute["MeasureID"] = (
-        attribute["SampleName"].split(".")[0] + "Test" + str(attribute["TestNumber"])
-    )
-
+    try:
+        datatext = extract_text(inputfilestring, "Variables\n", "\n\nSegment Definition")
+        colssegmentinverted = [
+            line.replace('"', "").split(" ")
+            for line in datatext.splitlines()
+        ]
+        attribute.update({item[0]: item[1] for item in colssegmentinverted})
+        # -------------------------------- ID MEASURE -------------------------------- #
+        # attribute["MeasureID"] = (
+        #     attribute["SampleName"].split(".")[0] + "Test" + str(attribute["TestNumber"])
+        # )
+    except Exception as e:
+        print(e)
     # ----------------------------------- Array ---------------------------------- #
-    datatext = extract_text(inputfilestring, '"Channel Data"\n', "\n\n\n")
+    datatext = extract_text(inputfilestring, 'Channel Data\n', "\n\n\n")
     cols = [
         line.replace('"', "").replace(" ", "").split(",")
         for line in datatext.splitlines()
