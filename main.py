@@ -425,7 +425,7 @@ with tabs[7]:
             id += 1
             
         excelplot = px.line(
-            dfplot, x="EngineeringStrain", y="LoadOnSpecimen", color="id"
+            dfplot, x="EngineeringStrain", y="EngineeringStress", color="id"
         )
         st.plotly_chart(excelplot)
 #        dfstrength = dict()
