@@ -135,12 +135,12 @@ with tabs[2]:
 #    figcollectiontree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
 #    figcollectiontree.update_traces(marker=dict(cornerradius=20))
 #    st.plotly_chart(figcollectiontree)
-#    st.divider()
-#    st.write("## Tagged sample tree map")
-#    with st.expander("Filters", expanded=False):
-#        speciestagfilter = st.multiselect(
-#            "Tags", dfs.tag.unique(), dfs.tag.unique(), key="tagfilter1"
-#        )
+    st.divider()
+    st.write("## Tagged sample tree map")
+    with st.expander("Filters", expanded=False):
+       speciestagfilter = st.multiselect(
+           "Tags", dfs.tag.unique(), dfs.tag.unique(), key="tagfilter1"
+       )
     # FIXME Tag None is considered, but it shouldn't. The best thing would be to clean all the nones in explorer
     figcollectiontreetag = px.treemap(
         dfs.query("tag in @speciestagfilter").query("tag.notnull()"),
