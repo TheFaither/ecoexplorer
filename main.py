@@ -123,24 +123,24 @@ with tabs[2]:
     st.map(data=dfsmap)
     st.divider()
     # --------------------------------- Histogram -------------------------------- #
-    fighist = px.histogram(dfs, x="species", histfunc="count")
-    st.plotly_chart(fighist)
-    st.divider()
+#    fighist = px.histogram(dfs, x="species", histfunc="count")
+#    st.plotly_chart(fighist)
+#    st.divider()
     # ------------------------------ collection tree ----------------------------- #
-    st.write("## Taxonomic Sample Tree Map")
-    figcollectiontree = px.treemap(
-        dfs,
-        path=[px.Constant("all"), "family", "genus", "species"],
-    )
-    figcollectiontree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
-    figcollectiontree.update_traces(marker=dict(cornerradius=20))
-    st.plotly_chart(figcollectiontree)
-    st.divider()
-    st.write("## Tagged sample tree map")
-    with st.expander("Filters", expanded=False):
-        speciestagfilter = st.multiselect(
-            "Tags", dfs.tag.unique(), dfs.tag.unique(), key="tagfilter1"
-        )
+#    st.write("## Taxonomic Sample Tree Map")
+#    figcollectiontree = px.treemap(
+#        dfs,
+#        path=[px.Constant("all"), "family", "genus", "species"],
+#    )
+#    figcollectiontree.update_layout(margin=dict(t=50, l=25, r=25, b=25))
+#    figcollectiontree.update_traces(marker=dict(cornerradius=20))
+#    st.plotly_chart(figcollectiontree)
+#    st.divider()
+#    st.write("## Tagged sample tree map")
+#    with st.expander("Filters", expanded=False):
+#        speciestagfilter = st.multiselect(
+#            "Tags", dfs.tag.unique(), dfs.tag.unique(), key="tagfilter1"
+#        )
     # FIXME Tag None is considered, but it shouldn't. The best thing would be to clean all the nones in explorer
     figcollectiontreetag = px.treemap(
         dfs.query("tag in @speciestagfilter").query("tag.notnull()"),
