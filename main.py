@@ -53,7 +53,7 @@ dfi = conn.query("select * from investigator")
 dfs = conn.query("select * from sample")
 dfsindividuals = conn.query("select * from sample NATURAL JOIN individualsample")
 dft1 = conn.query(
-    "select silktrait.id, trait.samples_id, silktrait.silk_type, sample.tag as sample_tag, silktrait.diameter, silktrait.diameter_std, silktrait.diameter_listvals, trait.uploaddate, sample.collectiondate, trait.responsible_id, trait.tag as trait_tag, sample.family, sample.genus, sample.species, sample.nomenclature, sample.parent_id from silktrait NATURAL JOIN trait INNER JOIN sample ON trait.samples_id = sample.id"
+    "select silktrait.id, trait.samples_id, silktrait.silk_type, sample.tag as sample_tag, silktrait.diameter, silktrait.diameter_std, silktrait.diameter_listvals, silktrait.nfibres, trait.uploaddate, sample.collectiondate, trait.responsible_id, trait.tag as trait_tag, sample.family, sample.genus, sample.species, sample.nomenclature, sample.parent_id from silktrait NATURAL JOIN trait INNER JOIN sample ON trait.samples_id = sample.id"
 )
 dft2 = conn.query(
     "select individualtrait.id, trait.samples_id, individualtrait.weight, sample.tag as sample_tag, trait.uploaddate, sample.collectiondate, trait.responsible_id, trait.tag as trait_tag, sample.family, sample.genus, sample.species, sample.nomenclature, sample.parent_id from individualtrait NATURAL JOIN trait INNER JOIN sample ON sample.id = trait.samples_id"
